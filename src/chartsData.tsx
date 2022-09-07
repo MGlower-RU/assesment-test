@@ -7,6 +7,7 @@ export interface ChartType {
     title: {
       text: string
     },
+    colors: string[],
     series: {
       [name: string]: string | number | object | [];
       type: string;
@@ -21,10 +22,15 @@ export const data: ChartsType = [
     id: '1',
     options: {
       title: {
-        text: 'Area'
+        text: 'Companies stocks'
       },
       xAxis: {
         type: 'datetime',
+      },
+      yAxis: {
+        title: {
+          text: 'Stock price ($)'
+        },
       },
       colors: [
         '#8085e9',
@@ -41,7 +47,7 @@ export const data: ChartsType = [
       series: [
         {
           type: 'area',
-          name: 'area data',
+          name: 'some company stocks',
           data: [
             ['2022%1%30%11%13%45', 13.942275910900165],
             ['2022%2%30%11%13%45', 7.318573666825043],
@@ -56,7 +62,7 @@ export const data: ChartsType = [
         },
         {
           type: 'area',
-          name: 'area data',
+          name: 'another company stocks',
           data: [
             ['2022%1%30%11%13%45', 15.942275910900165],
             ['2022%2%30%11%13%45', 4.318573666825043],
@@ -76,10 +82,15 @@ export const data: ChartsType = [
     id: '2',
     options: {
       title: {
-        text: 'Spline'
+        text: 'Foreign habitans'
       },
       xAxis: {
         type: 'datetime',
+      },
+      yAxis: {
+        title: {
+          text: 'Alien reports frequency (thousands)'
+        }
       },
       colors: [
         '#2b908f',
@@ -94,11 +105,21 @@ export const data: ChartsType = [
       ],
       series: [{
         type: 'spline',
-        name: 'spline data',
+        name: 'alien reports',
         data: [
-          ['2018%7%30%11%13%45', 13.942275910900165],
+          ['2018%7%30%11%13%45', 2.12275910900165],
           ['2020%7%30%11%13%45', 2.318573666825043],
-          ['2021%7%30%11%13%45', 2.2514362989011865],
+          ['2020%9%17%11%13%45', 2.458573666825043],
+          ['2020%11%25%11%13%45', 2.518573666825043],
+          ['2021%2%30%11%13%45', 2.688573666825043],
+          ['2021%4%3%11%13%45', 2.608573666825043],
+          ['2021%5%30%11%13%45', 2.54214362989011865],
+          ['2021%7%30%11%13%45', 2.53214362989011865],
+          ['2021%9%30%11%13%45', 2.52214362989011865],
+          ['2021%11%30%11%13%45', 2.50214362989011865],
+          ['2022%1%30%11%13%45', 2.5214362989011865],
+          ['2022%3%30%11%13%45', 2.54214362989011865],
+          ['2022%5%30%11%13%45', 2.53214362989011865],
           ['2022%7%30%11%13%45', 2.407737253343039],
         ]
       }]
@@ -108,10 +129,15 @@ export const data: ChartsType = [
     id: '3',
     options: {
       title: {
-        text: 'Line'
+        text: 'Something'
       },
       xAxis: {
         type: 'datetime',
+      },
+      yAxis: {
+        title: {
+          text: 'Is it something meaningful?'
+        }
       },
       colors: [
         '#434348',
@@ -126,11 +152,11 @@ export const data: ChartsType = [
       ],
       series: [{
         type: 'line',
-        name: 'line data',
+        name: 'some strange data',
         data: [
           ['2015%5%20%12%13%45', 13.942275910900165],
-          ['2021%1%12%10%13%45', 2.318573666825043],
           ['2021%2%24%09%13%45', 3.2514362989011865],
+          ['2021%1%12%10%13%45', 2.318573666825043],
           ['2022%1%30%11%13%45', 1.807737253343039],
           ['2022%4%30%11%13%45', 2.707737253343039],
           ['2022%7%30%11%13%45', 2.207737253343039],

@@ -27,8 +27,10 @@ export const MainContext = createContext<{
 })
 
 export default function Context({ children }: InputProviderProps) {
-  // configure localStorage for charts
-  const [chartsData, setChartsData] = useState<ChartsType | []>(data)
+  const [chartsData, setChartsData] = useState<ChartsType | []>(() => {
+    const savedTodos = localStorage.getItem("charts");
+    return savedTodos ? JSON.parse(savedTodos) : data;
+  })
   const [filteredData, setFilteredData] = useState<ChartsType | []>([])
   const [dateRange, setDateRange] = useState<DateRange>({
     startDate: dayjs('2020-01-01'),
@@ -51,13 +53,17 @@ export default function Context({ children }: InputProviderProps) {
           data: el.data.filter(date => {
             const MSdate = (typeof date[0] === 'number') ? date[0] : setDateToMS(date[0])
             return (MSdate > dayjs(dateRange.startDate).valueOf() && MSdate < dayjs(dateRange.endDate).valueOf())
-          }).map((date) => (typeof date[0] === 'number') ? date : [setDateToMS(date[0]), date[1]])
+          }).map((date) => (typeof date[0] === 'number') ? date : [setDateToMS(date[0]), date[1]]).sort((a, b) => a[0] - b[0])
         }))}
       }
     ))
 
     setFilteredData(dateInMS)
   }, [dateRange, chartsData])
+
+  useEffect(() => {
+    localStorage.setItem('charts', JSON.stringify(chartsData))
+  }, [chartsData])
 
   return (
     <MainContext.Provider value={{

@@ -5,6 +5,7 @@ import { useContext, useEffect, useId, useState } from "react";
 import { NavigateFunction, NavLink, NavLinkProps, Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import { ChartsType } from "../chartsData";
 import { MainContext } from "../components/Context";
+import { merge } from 'lodash'
 
 interface ChartsListProps {
   navigate: NavigateFunction;
@@ -138,6 +139,7 @@ export function CreateChart() {
       JSON.parse(data).map((el: any) => ({...el, type: type}))
       JSON.parse(customOptions)
     } catch(err) {
+      // give meaningful alerts or something from mui dialog in both (add and edit functions)
       return
     }
 
@@ -155,7 +157,7 @@ export function CreateChart() {
         xAxis: {
           type: 'datetime',
         },
-        colors: colors[0].match(/^(?:#[0-9a-f]{3}|#[0-9a-f]{6})$/) || [
+        colors: colors[0].match(/^(?:#[0-9a-f]{3}|#[0-9a-f]{6})$/) ? colors : [
           '#8085e9',
           '#91e8e1',
           '#90ed7d',
@@ -226,10 +228,63 @@ export function CreateChart() {
 }
 
 export function EditChart() {
-  const { filteredData } = useContext(MainContext)
+  const { availableChartTypes, setChartsData, chartsData } = useContext(MainContext)
   const { chartId } = useParams()
-  const chartById = filteredData.find(el => el.id === chartId)
   const navigate = useNavigate()
+
+  const chartById = chartsData.find(el => el.id === chartId)  
+
+  const [name, setName] = useState(chartById ? chartById.options.title.text : '')
+  const [type, setType] = useState(chartById ? chartById.options.series[0].type : 'line')
+  const [data, setData] = useState<string>(chartById ? JSON.stringify(chartById.options.series) : '[]')
+  const [customOptions, setCustomOptions] = useState<string>('{}')
+  const [colors, setColors] = useState<string[] | string>(chartById ? chartById.options.colors : [''])
+
+  function editChart() {
+    if(chartById !== undefined) {
+      if(data.indexOf('data') === -1 && data.indexOf('name') === -1) { return }
+      try {
+        JSON.parse(data).map((el: any) => ({...el, type: type}))
+        JSON.parse(customOptions)
+      } catch(err) {
+        return
+      }
+
+      const seriesData = JSON.parse(data).map((el: any) => ({...el, type: type}))
+      const customOptionsData = JSON.parse(customOptions)
+
+      if(typeof customOptionsData !== 'object') { return }
+
+      const editedChart = {
+        options: {
+          title: {
+            text: name
+          },
+          xAxis: {
+            type: 'datetime',
+          },
+          colors: colors[0].match(/^(?:#[0-9a-f]{3}|#[0-9a-f]{6})$/) ? colors : [
+            '#8085e9',
+            '#91e8e1',
+            '#90ed7d',
+            '#f7a35c',
+            '#434348',
+            '#f45b5b',
+            '#8085e9',
+            '#f15c80',
+            '#e4d354',
+            '#2b908f',
+          ],
+          series: seriesData
+        }
+      }
+
+      const editedChartMerged = merge(chartById, editedChart, {options: customOptionsData})
+
+      setChartsData(chartsData.map(el => el.id === chartById.id ? editedChartMerged : el))
+      navigate('/charts')
+    }
+  }
 
   useEffect(() => {
     if(chartById === undefined) {
@@ -239,12 +294,48 @@ export function EditChart() {
 
   return (
     <>
-      <Typography id="modal-modal-title" variant="h6" component="h2">
-        "Change chart text"
+      <Typography id="modal-modal-title" variant="h5" component="h2" align={'center'} sx={{ mb: 3 }}>
+        Edit chart
       </Typography>
-      <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-        Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-      </Typography>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <TextField label="Chart name" color="primary"
+          value={name} onChange={e => e.target.value.match(/^.{0,50}$/) && setName(e.target.value)}
+        />
+        <FormControl>
+          <InputLabel>Type</InputLabel>
+          <Select
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+            value={type}
+            label="Type"
+            onChange={e => setType(e.target.value)}
+          >
+            {availableChartTypes.map((el, i) => (
+              <MenuItem key={i} value={el}>{el}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Tooltip
+          title={`[{"name": "String name", "data": [["YYYY%M%D%h%m%s%ms", "value"], ["YYYY%M", "value"]]}, {"name": "Number name", "data": [["YYYY", number], ["YYYY", number]]}]`}
+          enterTouchDelay={0} followCursor
+        >
+          <TextField label="Data" color="primary" helperText={`[{"name":"String name","data":[["YYYY%M%D%h%m%s%ms","value"],["YYYY%M","value"]]}](JSON)`}
+            value={data} onChange={e => setData(e.target.value.replaceAll('  ', ' '))} multiline maxRows={5}
+          />
+        </Tooltip>
+        <TextField label="Colors" color="primary" helperText="Colors format(hex): color,color,color" multiline maxRows={2}
+          value={colors} onChange={e => setColors(e.target.value.replace(/[^0-9a-f#,]/i, '').split(','))}
+        />
+        <Tooltip title={`{"title": {"text": "New title name"}}`} enterTouchDelay={0} followCursor>
+          <TextField label="Custom options" color="primary"
+            helperText="Paste your own options to add new or override existing(JSON)" multiline maxRows={5}
+            value={customOptions} onChange={e => setCustomOptions(e.target.value.replaceAll('  ', ' '))}
+          />
+        </Tooltip>
+        <Box>
+          <Button variant={'contained'} onClick={editChart}>Add chart</Button>
+        </Box>
+      </Box>
     </>
   )
 }

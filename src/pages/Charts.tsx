@@ -37,7 +37,7 @@ export default function Charts() {
 
   return (
     <>
-      { filteredData.length === 0 ? <Typography variant='h4' component='h2' align="center">Sorry there are no any charts!</Typography> : null }
+      {filteredData.length === 0 ? <Typography variant='h4' component='h2' align="center">Sorry there are no any charts!</Typography> : null }
       <Box sx={{
         display: filteredData.length > 0 ? 'flex' : 'none',
         gap: 2,
