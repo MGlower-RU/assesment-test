@@ -3,11 +3,14 @@ import dayjs from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Box, Card, CardContent, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
 import Grid from '@mui/material/Unstable_Grid2';
-import HighchartsReact from "highcharts-react-official";
+import NoDataToDisplay from 'highcharts/modules/no-data-to-display'
 import Highcharts from 'highcharts';
+import HighchartsReact from "highcharts-react-official";
 import { useContext } from 'react'
 import { MainContext } from '../components/Context';
 import { ChartsType, ChartType } from '../chartsData';
+
+NoDataToDisplay(Highcharts)
 
 const GridItems = ({ data }: { data: ChartsType }) => {
   return (
