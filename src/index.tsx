@@ -1,16 +1,9 @@
-import React from 'react';
+import React, { ReactNode, useContext } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { createTheme, CssBaseline, responsiveFontSizes, ThemeProvider } from '@mui/material';
 import { BrowserRouter } from 'react-router-dom';
-import Context from './components/Context';
-
-let theme = createTheme({
-  palette: {
-    mode: 'light'
-  }
-})
-theme = responsiveFontSizes(theme)
+import Context, { MainContext } from './components/Context';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -18,12 +11,29 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <Context>
-      <ThemeProvider theme={theme}>
+      <ThemeContextProvider>
         <CssBaseline />
         <BrowserRouter>
           <App />
         </BrowserRouter>
-      </ThemeProvider>
+      </ThemeContextProvider>
     </Context>
   </React.StrictMode>
 )
+
+function ThemeContextProvider({ children }: { children: ReactNode }) {
+  const { themeMode } = useContext(MainContext)
+
+  let theme = createTheme({
+    palette: {
+      mode: themeMode
+    }
+  })
+  theme = responsiveFontSizes(theme)
+
+  return (
+    <ThemeProvider theme={theme}>
+      {children}
+    </ThemeProvider>
+  )
+}

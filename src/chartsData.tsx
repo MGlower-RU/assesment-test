@@ -3,7 +3,7 @@ export interface ChartType {
   // preferably use Highcharts.Options
   // Why didn't i use it? There is a bug with data options for charts that some of them have no that parameter but if you try check on it typescript will curse you for your checking
   options: {
-    [name: string]: object | [];
+    [name: string]: object | [] | string;
     title: {
       text: string
     },

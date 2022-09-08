@@ -9,6 +9,8 @@ HighchartsHeatMap(Highcharts)
 interface InputProviderProps { children: React.ReactNode }
 interface DateRange { startDate: Dayjs | null, endDate: Dayjs | null }
 
+type themeMode = "dark" | "light"
+export type SetThemeMode = React.Dispatch<React.SetStateAction<themeMode>>
 export type SetChartsData = React.Dispatch<React.SetStateAction<ChartsType>>
 export type SetDateRange = React.Dispatch<React.SetStateAction<DateRange>>
 
@@ -20,13 +22,17 @@ export const MainContext = createContext<{
   dateRange: DateRange;
   setDateRange: SetDateRange;
   availableChartTypes: string[];
+  themeMode: themeMode;
+  setThemeMode: SetThemeMode;
 }>({
   chartsData: [], setChartsData: () => {},
   dateRange: { startDate: null, endDate: null }, setDateRange: () => null,
-  filteredData: [], setFilteredData: () => {}, availableChartTypes: ['']
+  filteredData: [], setFilteredData: () => {}, availableChartTypes: [''],
+  themeMode: 'light', setThemeMode: () => {}
 })
 
 export default function Context({ children }: InputProviderProps) {
+  const [themeMode, setThemeMode] = useState<"dark" | "light">("light")
   const [chartsData, setChartsData] = useState<ChartsType | []>(() => {
     const savedTodos = localStorage.getItem("charts");
     return savedTodos ? JSON.parse(savedTodos) : data;
@@ -67,6 +73,7 @@ export default function Context({ children }: InputProviderProps) {
 
   return (
     <MainContext.Provider value={{
+      themeMode, setThemeMode,
       chartsData, setChartsData,
       dateRange, setDateRange,
       filteredData, setFilteredData,

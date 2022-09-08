@@ -40,7 +40,7 @@ export default function Settings() {
 
   return (
     <>
-      { filteredData.length === 0 ? <Typography variant='h4' component='h2' align="center">There is nothing here.</Typography> : null }
+      {filteredData.length < 1 ? <Typography variant='h4' component='h2' align="center">There is nothing here.</Typography> : null}
       <ChartsList navigate={navigate} charts={chartsData} theme={theme} deleteChart={deleteChart} />
       <Modal
         disableAutoFocus={true}

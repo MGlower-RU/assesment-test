@@ -15,7 +15,7 @@ NoDataToDisplay(Highcharts)
 const GridItems = ({ data }: { data: ChartsType }) => {
   return (
     <>
-      {data.length > 0 && data.map((el: ChartType) => (
+      {data.length > 0 ? data.map((el: ChartType) => (
         <Grid key={el.id} xs={12} lg={6} sx={{
           textAlign: 'center',
           flexGrow: 1
@@ -26,21 +26,19 @@ const GridItems = ({ data }: { data: ChartsType }) => {
             </CardContent>
           </Card>
         </Grid>
-      ))}
+      )) : null}
     </>
   )
 }
 
 export default function Charts() {
   const theme = useTheme()
-
   const { dateRange, setDateRange, filteredData } = useContext(MainContext)
-
   const isMobile = useMediaQuery(theme.breakpoints.down("md"))
 
   return (
     <>
-      {filteredData.length === 0 ? <Typography variant='h4' component='h2' align="center">Sorry there are no any charts!</Typography> : null }
+      {filteredData.length < 1 ? <Typography variant='h4' component='h2' align="center">Sorry there are no any charts!</Typography> : null}
       <Box sx={{
         display: filteredData.length > 0 ? 'flex' : 'none',
         gap: 2,
