@@ -1,15 +1,15 @@
-import { BarChart, Delete, MultilineChart, PieChart, ShowChart, Add as AddIcon } from "@mui/icons-material";
-import { Button, Fab, FormControl, InputLabel, List, ListItem, MenuItem, Modal, Paper, Select, TextField, Theme, Tooltip, Typography, useTheme } from "@mui/material";
+import { BarChart, Delete, MultilineChart, PieChart, ShowChart, Add as AddIcon, Close } from "@mui/icons-material";
+import { Button, Fab, FormControl, IconButton, InputLabel, List, ListItem, MenuItem, Modal, Paper, Select, TextField, Theme, Tooltip, Typography, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
 import { useContext, useEffect, useId, useState } from "react";
 import { NavigateFunction, NavLink, NavLinkProps, Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import { ChartsType } from "../chartsData";
-import { MainContext } from "../components/Context";
+import { MainContext, SetChartsData } from "../components/Context";
 import { merge } from 'lodash'
 
 interface ChartsListProps {
   navigate: NavigateFunction;
-  deleteChart: (id: string) => void;
+  deleteChart: (id: string, data: ChartsType, setData: SetChartsData) => void;
   charts: ChartsType;
   theme: Theme;
 }
@@ -21,18 +21,29 @@ const ChartIcon = ({ type }: { type: string }) => {
   return <MultilineChart />
 }
 
+const CloseModalButton = () => {
+  const navigate = useNavigate()
+
+  return (
+    <IconButton onClick={() => navigate('/settings')} aria-label="modal-close" color="primary"
+      sx={{ position: 'absolute', top: 17, right: 30 }}
+    >
+      <Close />
+    </IconButton>
+  )
+}
+
+function deleteChart(id: string, data: ChartsType, setData: SetChartsData) {
+  setData(data.filter(el => el.id !== id))
+}
+
 export default function Settings() {
   const theme = useTheme()
-  const { chartsData, setChartsData, filteredData } = useContext(MainContext)
+  const { chartsData, filteredData } = useContext(MainContext)
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const isModalPath = pathname.split('/').filter(el => el !== '').length > 1
-
   const [modal, setModal] = useState<boolean>(isModalPath);
-
-  function deleteChart(id: string) {
-    setChartsData(filteredData.filter(el => el.id !== id))
-  }
 
   useEffect(() => {
     isModalPath ? setModal(true) : setModal(false)
@@ -72,6 +83,8 @@ export default function Settings() {
 }
 
 function ChartsList({ navigate, deleteChart, charts, theme }: ChartsListProps) {
+  const { filteredData, setChartsData } = useContext(MainContext)
+
   const handleModal = (e: React.MouseEvent<HTMLElement, MouseEvent>, id: string): void => {
     if((e.target as HTMLButtonElement).closest('.settings__chart-list__button--delete') === null) {
       navigate(`/settings/${id}`)
@@ -101,7 +114,7 @@ function ChartsList({ navigate, deleteChart, charts, theme }: ChartsListProps) {
             <Typography>{el.options.title.text}</Typography>
             <Button
               className="settings__chart-list__button--delete" aria-label="delete"
-              variant="contained" color="error" sx={{ ml: 'auto' }} onClick={() => deleteChart(el.id)}
+              variant="contained" color="error" sx={{ ml: 'auto' }} onClick={() => deleteChart(el.id, filteredData, setChartsData)}
             ><Delete fontSize="small"/></Button>
           </Paper>
         </ListItem>
@@ -134,19 +147,25 @@ export function CreateChart() {
   ])
 
   function addChart() {
-    if(data.indexOf('data') === -1 && data.indexOf('name') === -1) { return }
+    if(data.indexOf('data') === -1 && data.indexOf('name') === -1) {
+      alert('You have no either DATA or NAME string in your data')
+      return
+    }
     try {
       JSON.parse(data).map((el: any) => ({...el, type: type}))
       JSON.parse(customOptions)
     } catch(err) {
-      // give meaningful alerts or something from mui dialog in both (add and edit functions)
+      alert('Your data is incorrect')
       return
     }
 
     const seriesData = JSON.parse(data).map((el: any) => ({...el, type: type}))
     const customOptionsData = JSON.parse(customOptions)
 
-    if(typeof customOptionsData !== 'object') { return }
+    if(typeof customOptionsData !== 'object') {
+      alert('Your custom options written incorrectly')
+      return
+    }
 
     const newChart = {
       id: id,
@@ -181,6 +200,7 @@ export function CreateChart() {
 
   return (
     <>
+      <CloseModalButton />
       <Typography id="modal-modal-title" variant="h5" component="h2" align={'center'} sx={{ mb: 3 }}>
         Create chart
       </Typography>
@@ -228,32 +248,39 @@ export function CreateChart() {
 }
 
 export function EditChart() {
-  const { availableChartTypes, setChartsData, chartsData } = useContext(MainContext)
+  const { availableChartTypes, setChartsData, chartsData, filteredData } = useContext(MainContext)
   const { chartId } = useParams()
   const navigate = useNavigate()
 
-  const chartById = chartsData.find(el => el.id === chartId)  
+  const chartById = chartsData.find(el => el.id === chartId)
 
   const [name, setName] = useState(chartById ? chartById.options.title.text : '')
   const [type, setType] = useState(chartById ? chartById.options.series[0].type : 'line')
-  const [data, setData] = useState<string>(chartById ? JSON.stringify(chartById.options.series) : '[]')
+  const [data, setData] = useState<string>(chartById ? JSON.stringify(chartById.options.series.map(({ type, ...rest }) => rest)) : '[]')
   const [customOptions, setCustomOptions] = useState<string>('{}')
   const [colors, setColors] = useState<string[] | string>(chartById ? chartById.options.colors : [''])
 
   function editChart() {
     if(chartById !== undefined) {
-      if(data.indexOf('data') === -1 && data.indexOf('name') === -1) { return }
+      if(data.indexOf('data') === -1 && data.indexOf('name') === -1) {
+        alert('You have no either DATA or NAME string in your data')
+        return
+      }
       try {
         JSON.parse(data).map((el: any) => ({...el, type: type}))
         JSON.parse(customOptions)
       } catch(err) {
+        alert('Your data is incorrect')
         return
       }
 
       const seriesData = JSON.parse(data).map((el: any) => ({...el, type: type}))
       const customOptionsData = JSON.parse(customOptions)
 
-      if(typeof customOptionsData !== 'object') { return }
+      if(typeof customOptionsData !== 'object') {
+        alert('Your custom options written incorrectly')
+        return
+      }
 
       const editedChart = {
         options: {
@@ -286,6 +313,11 @@ export function EditChart() {
     }
   }
 
+  const deleteChartHandle = () => {
+    deleteChart(chartId as string, filteredData, setChartsData)
+    navigate('/settings')
+  }
+
   useEffect(() => {
     if(chartById === undefined) {
       navigate('/settings/add-chart', { replace: true })
@@ -294,6 +326,7 @@ export function EditChart() {
 
   return (
     <>
+      <CloseModalButton />
       <Typography id="modal-modal-title" variant="h5" component="h2" align={'center'} sx={{ mb: 3 }}>
         Edit chart
       </Typography>
@@ -332,8 +365,9 @@ export function EditChart() {
             value={customOptions} onChange={e => setCustomOptions(e.target.value.replaceAll('  ', ' '))}
           />
         </Tooltip>
-        <Box>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
           <Button variant={'contained'} onClick={editChart}>Add chart</Button>
+          <Button variant={'contained'} color="error" onClick={deleteChartHandle}>Delete chart</Button>
         </Box>
       </Box>
     </>

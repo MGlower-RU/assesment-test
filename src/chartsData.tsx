@@ -11,6 +11,7 @@ export interface ChartType {
     series: {
       [name: string]: string | number | object | [];
       type: string;
+      name: string;
       data: Array<any>[];
     }[]
   };
